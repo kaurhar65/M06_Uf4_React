@@ -19,9 +19,9 @@ divisiblePerDos(2)
 const majorMenor10 = new Promise ((resolve, reject) => {
     const num = 5;
     if( num >= 0 && num <= 10){
-        resolve("El valor es mayor o igual y menor o igual que 10")
+        resolve(`El ${num} está dentro del rango (1-10)`)
     }else{
-        reject("El valor no es mayor o igual ni menor o igual que 10")
+        reject(`El ${num} está fuera del rango (1-10)`)
     }
 });
 
@@ -51,10 +51,11 @@ esVocal("h")
 
  function division(dividendo, divisor){
     return new Promise ((resolve, reject) => {
-        let resultado;
+
         if(divisor == 0 ){
-            reject(new error("El divisor no puede ser 0"));
+            reject(new Error("El divisor no puede ser 0"));
         }else{
+            let resultado;
             resolve(resultado = dividendo / divisor);
         }
     });
