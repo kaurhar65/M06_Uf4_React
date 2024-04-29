@@ -1,0 +1,15 @@
+
+.contenedorGeneral{
+    background-color: #e3d5ca;
+    width: 500px;
+    height: 300px;
+}
+
+.buttonDiv{
+    display: flex;
+    padding-top: 100px;
+}
+
+h1{
+    color: #003566;
+}
