@@ -11,6 +11,7 @@ function FormulariTasques(props) {
   const enviarForm = (e) => {
     e.preventDefault();
     const tascaNova = {
+      id: props.idTasca,
       titol: textTasca,
       completada: false,
     };
@@ -21,8 +22,8 @@ function FormulariTasques(props) {
   return (
     <>
       <form onSubmit={enviarForm}>
-        <input type="text" value ={textTasca} onChange={canviTextTasca}></input>
-        <button>Enviar</button>
+        <input type="text" value={textTasca} onChange={canviTextTasca} />
+        <button type="submit">Enviar</button>
       </form>
     </>
   );
