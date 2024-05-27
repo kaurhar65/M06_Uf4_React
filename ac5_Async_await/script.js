@@ -11,40 +11,44 @@ let total_pages = 1;
 let current_page = 1;
 
 async function setFav(id, favBool) {
-    moviesResult.innerHTML = "";
     const url = `https://api.themoviedb.org/3/account/${keys.account_id}/favorite?api_key=${keys.api_key}&session_id=${keys.session_id}`;
     const options = {
-        method : 'POST',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ media_type: 'movie',media_id: id,favorite: favBool})
+        body: JSON.stringify({ media_type: 'movie', media_id: id, favorite: favBool })
     };
 
-    await fetch(url, options)
-        .then(response => response.json())   
-        .then(response => console.log(response))
-        .catch(error => console.log(error));      
+    try {
+        await fetch(url, options);
         console.log(`ID ${id} marked as ${favBool}`);
-        showFavs();
+        await showFavs();
+    } catch (error) {
+        console.error(error);
+    }
 }
 
+async function showFavs() {
+    current_page = 1;
+    total_pages = 1;
+    moviesResult.innerHTML = "";
 
-async function showFavs(){
-    moviesResult.innerHTML="";
     const url = `https://api.themoviedb.org/3/account/${keys.account_id}/favorite/movies?language=en-US&page=1&api_key=${keys.api_key}&session_id=${keys.session_id}&sort_by=created_at.asc`;
     const options = {
-        method : 'GET',
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json'
-        }       
+        }
     };
-    await fetch(url, options)
-    .then(response => response.json())   
-    .then (data => {
+
+    try {
+        const response = await fetch(url, options);
+        const data = await response.json();
         data.results.forEach(movie => printMovie(movie, true, false));
-    })
-    .catch(error => console.error(error));
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 async function searchMovies(query) {
@@ -67,11 +71,14 @@ async function searchMovies(query) {
 
     try {
         const response = await fetch(url, options);
-        const data = await response.json();        
+        const data = await response.json();
         if (current_page === 1) {
             total_pages = data.total_pages;
         }
-        data.results.forEach(movie => printMovie(movie, true, false));
+        for (const movie of data.results) {
+            const isFavorite = await favorito(movie.id);
+            printMovie(movie, isFavorite, false);
+        }
         gifCargando.style.display = "none";
     } catch (error) {
         console.error(error);
@@ -83,11 +90,30 @@ window.addEventListener('scroll', () => {
 
     if (scrollTop + clientHeight >= scrollHeight - 5 && current_page < total_pages) {
         current_page++;
-        
+
         gifCargando.style.display = "block";
         searchMovies(current_query);
     }
 });
+
+async function favorito(id) {
+    const url = `https://api.themoviedb.org/3/movie/${id}/account_states?api_key=${keys.api_key}&session_id=${keys.session_id}`;
+    const options = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+
+    try {
+        const response = await fetch(url, options);
+        const data = await response.json();
+        return data.favorite;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+}
     
 
 /* FUNCIONS D'INTERACCIÓ AMB EL DOM */
