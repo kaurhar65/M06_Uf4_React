@@ -49,7 +49,21 @@ async function showFavs(){
 async function searchMovies(query){
     clearInput();
     removeActive();
+    var current_page = 1;
+    const url = `https://api.themoviedb.org/3/search/movie?query=${query}&include_adult=false&language=en-US&page=${current_page}&api_key=${keys.api_key}&session_id=${keys.session_id}`;
+    const options = {
+        method : 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }       
+    };
 
+    await fetch(url, options)
+    .then (response => response.json())
+    .then (data => {
+        data.results.forEach(movie => printMovie(movie, true, false));
+    })
+    .catch(error => console.error(error));
 }
 
 
