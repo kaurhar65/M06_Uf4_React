@@ -4,9 +4,11 @@ const keys = {
     session_id: 'cf901bed16b3c6572d3df1489e3e1f46e7213d56',
     account_id: '21290823'
 }
-
+let current_query = "";
 let moviesResult = document.getElementById("moviesResult");
-
+let gifCargando = document.getElementById("load");
+let total_pages = 1;
+let current_page = 1;
 
 async function setFav(id, favBool) {
     moviesResult.innerHTML = "";
@@ -16,14 +18,13 @@ async function setFav(id, favBool) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ media_type: 'movie',media_id: id,favorite: favBool })
+        body: JSON.stringify({ media_type: 'movie',media_id: id,favorite: favBool})
     };
 
     await fetch(url, options)
         .then(response => response.json())   
         .then(response => console.log(response))
         .catch(error => console.log(error));      
-        // const data = response.json();
         console.log(`ID ${id} marked as ${favBool}`);
         showFavs();
 }
@@ -46,27 +47,48 @@ async function showFavs(){
     .catch(error => console.error(error));
 }
 
-async function searchMovies(query){
+async function searchMovies(query) {
     clearInput();
     removeActive();
-    var current_page = 1;
+
+    if (current_query !== query) {
+        current_page = 1;
+        moviesResult.innerHTML = "";
+    }
+
+    current_query = query;
     const url = `https://api.themoviedb.org/3/search/movie?query=${query}&include_adult=false&language=en-US&page=${current_page}&api_key=${keys.api_key}&session_id=${keys.session_id}`;
     const options = {
-        method : 'GET',
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json'
-        }       
+        }
     };
 
-    await fetch(url, options)
-    .then (response => response.json())
-    .then (data => {
+    try {
+        const response = await fetch(url, options);
+        const data = await response.json();        
+        if (current_page === 1) {
+            total_pages = data.total_pages;
+        }
         data.results.forEach(movie => printMovie(movie, true, false));
-    })
-    .catch(error => console.error(error));
+        gifCargando.style.display = "none";
+    } catch (error) {
+        console.error(error);
+    }
 }
 
+window.addEventListener('scroll', () => {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
+    if (scrollTop + clientHeight >= scrollHeight - 5 && current_page < total_pages) {
+        current_page++;
+        
+        gifCargando.style.display = "block";
+        searchMovies(current_query);
+    }
+});
+    
 
 /* FUNCIONS D'INTERACCIÓ AMB EL DOM */
 
